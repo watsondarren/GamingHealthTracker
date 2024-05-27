@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Gaming Health Tracker</string>
+    <string name="magic">Magic The Gathering</string>
+    <string name="submit">Submit</string>
+    <string name="dungeons">Dungeon and Dragons</string>
+    <string name="player_count">Player Count</string>
+    <string name="starting_health">Starting Health</string>
+    <string name="setup_tab">Setup</string>
+    <string name="game_tab">Game</string>
+    <string name="reset">Reset</string>
+    <string name="in_progress">Work In Progess</string>
+    <string name="no_game">No game is currently set</string>
+</resources>
