@@ -7,12 +7,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Refresh
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Scaffold
@@ -23,7 +33,9 @@ import androidx.compose.material3.TextField
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,12 +43,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gaminghealthtracker.ui.theme.GamingHealthTrackerTheme
 
 val viewModel = GameViewModel()
-val numbersOnly = Regex("^\\d+\$")
+val numbersOnly = Regex("^\\d+?")
+
+fun checkDigitsOnly(stringToCheck: String): Boolean {
+    return stringToCheck.matches(numbersOnly)
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +65,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(
                         Modifier
-                            .padding(16.dp)
+                            .padding(12.dp)
                             .padding(top = 16.dp),
                         verticalArrangement = Arrangement.SpaceBetween) {
                         TabRow(selectedTabIndex = viewModel.state,
@@ -55,35 +73,33 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Tab(
                                 selected = viewModel.state == 0,
-                                onClick = { viewModel.state = 0 },
-                                Modifier.padding(10.dp)
+                                onClick = { viewModel.state = 0 }
                             ) {
-                                Text(text = "Setup")
+                                MediumPaddingText(stringId = R.string.setup_tab)
                             }
                             Tab(
                                 selected = viewModel.state == 1,
-                                onClick = { viewModel.state = 1 },
-                                Modifier.padding(10.dp)
+                                onClick = { viewModel.state = 1 }
                             ) {
-                                Text(text = "Game")
+                                MediumPaddingText(stringId = R.string.game_tab)
                             }
                         }
                         if (viewModel.state == 0) {
                             SelectGameType()
                         } else if(viewModel.state == 1) {
                             Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                if(viewModel.currentGameType == "magic") {
-                                    Text(text = viewModel.health.toString(), fontSize = 30.sp, modifier = Modifier
-                                        .padding(8.dp)
-                                        .align(Alignment.CenterHorizontally))
-                                    Column {
-                                        PlayerControls()
-                                        ResetHealth()
+                                when (viewModel.currentGameType) {
+                                    "magic" -> {
+                                        MagicGameLayout()
                                     }
-                                } else {
-                                    Text(text = stringResource(id = R.string.no_game), fontSize = 30.sp, modifier = Modifier
-                                        .padding(8.dp)
-                                        .align(Alignment.CenterHorizontally))
+                                    "dungeon" -> {
+                                        DungeonGameLayout()
+                                    }
+                                    else -> {
+                                        Text(text = stringResource(id = R.string.no_game), fontSize = 24.sp, modifier = Modifier
+                                            .padding(8.dp)
+                                            .align(Alignment.CenterHorizontally))
+                                    }
                                 }
                             }
                         }
@@ -95,48 +111,77 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PlayerControls() {
-    Row {
-        AddFiveHealth()
-        AddOneHealth()
-        RemoveOneHealth()
-        RemoveFiveHealth()
+fun MagicGameLayout() {
+    LazyColumn {
+        for(i in 1..viewModel.players){
+            item {
+                val player by remember { mutableStateOf(Player(name = "Player $i", startingHealth = viewModel.startingPlayerHealth)) }
+                Row {
+                    CustomTextWithSizePaddingAlignment(
+                        textToDisplay = player.playerName,
+                        sizeOfFont = 24.sp,
+                        paddingToUse =8.dp
+                    )
+                }
+                CustomTextWithSizePaddingAlignment(
+                    textToDisplay = player.health.toString(),
+                    sizeOfFont = 24.sp,
+                    paddingToUse = 8.dp
+                )
+                Row {
+                    Button(onClick = { player.addOneHealth() } ) {
+                        Text(text = "+1")
+                    }
+                    Button(onClick = { player.removeOneHealth() } ) {
+                        Text(text = "-1")
+                    }
+                    Button(onClick = { player.removeFiveHealth() } ) {
+                        Text(text = "-5")
+                    }
+                    Button(onClick = { player.addFiveHealth() } ) {
+                        Text(text = "+5")
+                    }
+                }
+                CustomTextWithSizePaddingAlignment(
+                    textToDisplay = "Poison",
+                    sizeOfFont = 20.sp,
+                    paddingToUse = 6.dp
+                )
+                Row {
+                    Button(onClick = { player.poisonCounters++ }, Modifier.padding(4.dp)) {
+                        Icon(Icons.Filled.Add, "Add Counter")
+                    }
+                    Button(onClick = { player.poisonCounters = 0 }, Modifier.padding(4.dp)) {
+                        Icon(Icons.Filled.Delete, "Remove Counters")
+                    }
+                    for (counterNumber in 1..player.poisonCounters) {
+                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Poison Counter $counterNumber")
+                    }
+                }
+                Button(onClick = { player.reset() }) {
+                    Text(text = stringResource(id = R.string.reset))
+                }
+                Divider()
+            }
+        }
     }
 }
 
 @Composable
-fun Health() {
-}
-
-@Composable
-fun AddOneHealth() {
-    Button(onClick = { viewModel.health++ } ) {
-        Text(text = "+1")
-    }
-}
-@Composable
-fun RemoveOneHealth() {
-    Button(onClick = { viewModel.health-- } ) {
-        Text(text = "-1")
-    }
-}
-@Composable
-fun RemoveFiveHealth() {
-    Button(onClick = { viewModel.health -= 5 } ) {
-        Text(text = "-5")
-    }
-}
-@Composable
-fun AddFiveHealth() {
-    Button(onClick = { viewModel.health += 5 } ) {
-        Text(text = "+5")
-    }
-}
-
-@Composable
-fun ResetHealth() {
-    Button(onClick = { viewModel.health = viewModel.startingHealth }) {
-        Text(text = stringResource(id = R.string.reset))
+fun DungeonGameLayout() {
+    val player by remember { mutableStateOf(Player(name = viewModel.playerName, startingHealth = viewModel.startingPlayerHealth, startingArmorClass = viewModel.armorClass, startingMovement = viewModel.movement)) }
+    Column {
+        CustomTextWithSizePaddingAlignment(player.playerName, 24.sp, 8.dp)
+        Row(
+            Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(6.dp)) {
+            DndStatCard(player.health, "HP")
+            Spacer(modifier = Modifier.padding(4.dp))
+            DndStatCard(player.armorClass, "AC")
+            Spacer(modifier = Modifier.padding(4.dp))
+            DndStatCard(player.movement, "ft.")
+        }
     }
 }
 
@@ -145,19 +190,18 @@ fun SelectGameType() {
     val viewModel = GameViewModel()
     Column {
         for (game in viewModel.listOfGames) {
-            if (game == "magic") {
-                Card {
-                    Text(text = stringResource(id = R.string.magic), modifier = Modifier.padding(8.dp))
+            when (game) {
+                "magic" -> {
+                    MediumPaddingText(R.string.magic)
+                    MagicTheGathering()
+                    Divider(Modifier.padding(4.dp))
                 }
-                MagicTheGathering()
-            } else if(game == "dungeon") {
-                Card {
-                    Text(text = stringResource(id = R.string.dungeons), modifier = Modifier.padding(8.dp))
+                "dungeon" -> {
+                    MediumPaddingText(R.string.dungeons)
+                    DungeonAndDragonTracker()
                 }
-                DungeonAndDragonTracker()
-            } else {
-                Card {
-                    Text(text = stringResource(id = R.string.in_progress), modifier = Modifier.padding(8.dp))
+                else -> {
+                    MediumPaddingText( R.string.in_progress)
                 }
             }
         }
@@ -167,43 +211,124 @@ fun SelectGameType() {
 @Composable
 fun DungeonAndDragonTracker() {
     // Starting Health
-    // Temp Health
-    // Spell Slots
-}
-
-@Composable
-fun MagicTheGathering() {
-    //number of players
-    var playerInput by rememberSaveable { mutableStateOf("0") }
+    var playerName by rememberSaveable { mutableStateOf("") }
     TextField(
-        value = playerInput,
-        onValueChange = { playerInput = it },
-        label = {Text(text = stringResource(id = R.string.player_count))},
+        value = playerName,
+        onValueChange = { playerName = it },
+        label = {SmallPaddingText(R.string.player_name)},
+        maxLines = 1,
+        singleLine = true,
+    )
+    // Starting Health
+    var healthInput by rememberSaveable { mutableStateOf("0") }
+    TextField(
+        value = healthInput,
+        onValueChange = { if(checkDigitsOnly(it)){healthInput = it} },
+        label = {SmallPaddingText(R.string.starting_health)},
+        maxLines = 1,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+    )
+    var armorClass by rememberSaveable { mutableStateOf("10") }
+    TextField(
+        value = armorClass,
+        onValueChange = { if(checkDigitsOnly(it)){armorClass = it} },
+        label = {SmallPaddingText(R.string.armor_class)},
+        maxLines = 1,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+    )
+    var movementSpeed by rememberSaveable { mutableStateOf("30") }
+    TextField(
+        value = movementSpeed,
+        onValueChange = { if(checkDigitsOnly(it)){movementSpeed = it} },
+        label = { SmallPaddingText(R.string.movement) },
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
-    //starting health
+    Button(
+        onClick = {
+            viewModel.state = 1
+            viewModel.currentGameType = "dungeon"
+            viewModel.playerName = playerName
+            viewModel.startingPlayerHealth = healthInput.toInt()
+            viewModel.armorClass = armorClass.toInt()
+            viewModel.movement = movementSpeed.toInt()
+        },
+        Modifier.padding(4.dp)
+    ) {
+        SmallPaddingText(R.string.submit)
+    }
+}
+
+@Composable
+fun MagicTheGathering() {
+    //number of players
+    var playerInput by rememberSaveable { mutableIntStateOf(1) }
+    Column {
+        SmallPaddingText(R.string.player_count)
+        Row {
+            Column {
+                Button(onClick = {playerInput++}){ Icon(Icons.Filled.Add, "Increase Player Count")}
+                Button(onClick = {playerInput = 1}){Icon(Icons.Filled.Refresh, "Reset Player Count")}
+            }
+            Spacer(modifier = Modifier.size(10.dp))
+            Card {
+                Text(text = playerInput.toString(), fontSize = 24.sp, modifier = Modifier.padding(8.dp))
+            }
+        }
+    }
+
     var healthInput by rememberSaveable { mutableStateOf("0") }
     TextField(
         value = healthInput,
-        onValueChange = { healthInput = it},
-        label = { Text(text = stringResource(id = R.string.starting_health))},
+        onValueChange = { if(checkDigitsOnly(it)){healthInput = it}},
+        label = { SmallPaddingText(R.string.starting_health)},
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
 
     )
-
-    // Poison Counters
-    Button(onClick = { viewModel.startingHealth = healthInput.toInt(); viewModel.health = healthInput.toInt(); viewModel.players = playerInput.toInt(); viewModel.state = 1; viewModel.currentGameType = "magic"}) {
-        Text(text = stringResource(id = R.string.submit))
+    Button(
+        onClick = {
+            viewModel.state = 1
+            viewModel.currentGameType = "magic"
+            viewModel.players = playerInput
+            viewModel.startingPlayerHealth = healthInput.toInt()
+        },
+        Modifier.padding(4.dp)
+    ) {
+        SmallPaddingText(R.string.submit)
     }
 }
 
+@Composable
+fun DndStatCard(displayNumber: Int, title: String) {
+    Card {
+        CustomTextWithSizePaddingAlignment(displayNumber.toString(), 24.sp, 8.dp)
+        CustomTextWithSizePaddingAlignment(title, 16.sp, 6.dp)
+    }
+}
 
+@Composable
+fun MediumPaddingText(stringId: Int) {
+    Text(text = stringResource(id = stringId),
+        Modifier.padding(10.dp))
+}
 
+@Composable
+fun SmallPaddingText(stringId: Int) {
+    Text(text = stringResource(id = stringId),
+        Modifier.padding(8.dp))
+}
 
-
-
+@Composable
+fun CustomTextWithSizePaddingAlignment(textToDisplay: String, sizeOfFont: TextUnit, paddingToUse: Dp) {
+    Text(
+        text = textToDisplay,
+        fontSize = sizeOfFont,
+        modifier = Modifier.padding(paddingToUse)
+    )
+}
