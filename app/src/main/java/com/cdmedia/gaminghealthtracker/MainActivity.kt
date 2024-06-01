@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                 MediumPaddingText(stringId = R.string.game_tab)
                             }
                         }
-                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        Column() {
                             if (viewModel.state == 0) {
                                 SelectGameType()
 
@@ -133,6 +133,9 @@ fun MagicGameLayout() {
                     paddingToUse = 8.dp
                 )
                 Row {
+                    Button(onClick = { player.addFiveHealth() } ) {
+                        Text(text = "+5")
+                    }
                     Button(onClick = { player.addOneHealth() } ) {
                         Text(text = "+1")
                     }
@@ -141,9 +144,6 @@ fun MagicGameLayout() {
                     }
                     Button(onClick = { player.removeFiveHealth() } ) {
                         Text(text = "-5")
-                    }
-                    Button(onClick = { player.addFiveHealth() } ) {
-                        Text(text = "+5")
                     }
                 }
                 CustomTextWithSizePaddingAlignment(
@@ -158,14 +158,19 @@ fun MagicGameLayout() {
                     Button(onClick = { player.poisonCounters = 0 }, Modifier.padding(4.dp)) {
                         Icon(Icons.Filled.Delete, "Remove Counters")
                     }
-                    for (counterNumber in 1..player.poisonCounters) {
-                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Poison Counter $counterNumber")
+                    if(player.poisonCounters >=6) {
+                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Poison Counter")
+                        Text(text = "x${player.poisonCounters}")
+                    } else {
+                        for (counterNumber in 1..player.poisonCounters) {
+                            Icon(Icons.Default.FavoriteBorder, contentDescription = "Poison Counter $counterNumber")
+                        }
                     }
                 }
                 Button(onClick = { player.reset() }) {
                     Text(text = stringResource(id = R.string.reset))
                 }
-                Divider()
+                Divider(Modifier.padding(4.dp))
             }
         }
     }
@@ -186,35 +191,80 @@ fun DungeonGameLayout() {
             Spacer(modifier = Modifier.padding(4.dp))
             DndStatCard(player.movement, "ft.")
         }
-    }
-}
-
-@Composable
-fun SelectGameType() {
-    val viewModel = GameViewModel()
-    Column {
-        for (game in viewModel.listOfGames) {
-            when (game) {
-                "magic" -> {
-                    MediumPaddingText(R.string.magic)
-                    MagicTheGathering()
-                    Divider(Modifier.padding(4.dp))
-                }
-                "dungeon" -> {
-                    MediumPaddingText(R.string.dungeons)
-                    DungeonAndDragonTracker()
-                }
-                else -> {
-                    MediumPaddingText( R.string.in_progress)
-                }
+        Row(
+            Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(6.dp)) {
+            Button(onClick = { player.addFiveHealth() } ) {
+                Text(text = "+5")
+            }
+            Button(onClick = { player.addOneHealth() } ) {
+                Text(text = "+1")
+            }
+            Button(onClick = { player.removeOneHealth() } ) {
+                Text(text = "-1")
+            }
+            Button(onClick = { player.removeFiveHealth() } ) {
+                Text(text = "-5")
+            }
+        }
+        Divider(Modifier.padding(4.dp))
+        Row(Modifier
+            .align(Alignment.CenterHorizontally)
+            .padding(6.dp)) {
+            DndStatCard(player.temporaryHealth, "Temp HP")
+        }
+        Spacer(modifier = Modifier.padding(4.dp))
+        Row(Modifier
+            .align(Alignment.CenterHorizontally)
+            .padding(6.dp)) {
+            Button(onClick = { player.addFiveTempHealth() } ) {
+                Text(text = "+5")
+            }
+            Button(onClick = { player.addOneTempHealth() } ) {
+                Text(text = "+1")
+            }
+            Button(onClick = { player.removeOneTempHealth() } ) {
+                Text(text = "-1")
+            }
+            Button(onClick = { player.removeFiveTempHealth() } ) {
+                Text(text = "-5")
             }
         }
     }
 }
 
 @Composable
+fun SelectGameType() {
+    val viewModel = GameViewModel()
+    LazyColumn {
+        for (game in viewModel.listOfGames) {
+                when (game) {
+                    "magic" -> {
+                        item {
+                            MediumPaddingText(R.string.magic)
+                            MagicTheGathering()
+                        }
+                    }
+                    "dungeon" -> {
+                        item {
+                            MediumPaddingText(R.string.dungeons)
+                            DungeonAndDragonTracker()
+                        }
+                    }
+                    else -> {
+                        item {
+                            MediumPaddingText(R.string.in_progress)
+                        }
+                    }
+                }
+                item { Divider(Modifier.padding(4.dp)) }
+            }
+        }
+    }
+
+@Composable
 fun DungeonAndDragonTracker() {
-    // Starting Health
     var playerName by rememberSaveable { mutableStateOf("") }
     TextField(
         value = playerName,
@@ -223,7 +273,6 @@ fun DungeonAndDragonTracker() {
         maxLines = 1,
         singleLine = true,
     )
-    // Starting Health
     var healthInput by rememberSaveable { mutableStateOf("0") }
     TextField(
         value = healthInput,

@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 class GameViewModel: ViewModel() {
     var state: Int by mutableIntStateOf(0)
     var players by mutableIntStateOf(1)
-    val listOfGames = listOf("magic", "dungeon")
+    val listOfGames = listOf("magic", "dungeon", "")
     var currentGameType by mutableStateOf("")
     var playerName by mutableStateOf("")
     var startingPlayerHealth by mutableIntStateOf(0)
@@ -41,5 +41,17 @@ class Player(name: String = "", startingHealth: Int = 0, startingArmorClass: Int
     fun reset() {
         health = startingPlayerHealth
         poisonCounters = 0
+    }
+    fun addOneTempHealth() {
+        temporaryHealth++
+    }
+    fun addFiveTempHealth() {
+        temporaryHealth+=5
+    }
+    fun removeOneTempHealth() {
+        temporaryHealth--
+    }
+    fun removeFiveTempHealth() {
+        temporaryHealth-=5
     }
 }
