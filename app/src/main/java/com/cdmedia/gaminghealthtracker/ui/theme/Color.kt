@@ -1,4 +1,4 @@
-package com.example.gaminghealthtracker.ui.theme
+package com.cdmedia.gaminghealthtracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

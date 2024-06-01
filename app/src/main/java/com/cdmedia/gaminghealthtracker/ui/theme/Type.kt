@@ -1,4 +1,4 @@
-package com.example.gaminghealthtracker.ui.theme
+package com.cdmedia.gaminghealthtracker.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package com.example.gaminghealthtracker
+package com.cdmedia.gaminghealthtracker
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gaminghealthtracker.ui.theme.GamingHealthTrackerTheme
+import com.cdmedia.gaminghealthtracker.ui.theme.GamingHealthTrackerTheme
 
 val viewModel = GameViewModel()
 val numbersOnly = Regex("^\\d+?")
@@ -84,21 +84,25 @@ class MainActivity : ComponentActivity() {
                                 MediumPaddingText(stringId = R.string.game_tab)
                             }
                         }
-                        if (viewModel.state == 0) {
-                            SelectGameType()
-                        } else if(viewModel.state == 1) {
-                            Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                                when (viewModel.currentGameType) {
-                                    "magic" -> {
-                                        MagicGameLayout()
-                                    }
-                                    "dungeon" -> {
-                                        DungeonGameLayout()
-                                    }
-                                    else -> {
-                                        Text(text = stringResource(id = R.string.no_game), fontSize = 24.sp, modifier = Modifier
-                                            .padding(8.dp)
-                                            .align(Alignment.CenterHorizontally))
+                        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                            if (viewModel.state == 0) {
+                                SelectGameType()
+
+                            } else if(viewModel.state == 1) {
+                                    Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                                        when (viewModel.currentGameType) {
+                                            "magic" -> {
+                                                MagicGameLayout()
+                                            }
+                                            "dungeon" -> {
+                                                DungeonGameLayout()
+                                            }
+                                            else -> {
+                                                Text(text = stringResource(id = R.string.no_game), fontSize = 24.sp, modifier = Modifier
+                                                    .padding(8.dp)
+                                                    .align(Alignment.CenterHorizontally))
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -108,7 +112,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
+
 
 @Composable
 fun MagicGameLayout() {

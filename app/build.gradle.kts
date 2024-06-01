@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gaminghealthtracker"
+    namespace = "com.cdmedia.gaminghealthtracker"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.gaminghealthtracker"
+        applicationId = "com.cdmedia.gaminghealthtracker"
         minSdk = 33
         targetSdk = 34
         versionCode = 1
