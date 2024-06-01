@@ -1,4 +1,4 @@
-package com.example.gaminghealthtracker
+package com.cdmedia.gaminghealthtracker
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf

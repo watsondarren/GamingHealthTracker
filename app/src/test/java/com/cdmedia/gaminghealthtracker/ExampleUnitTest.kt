@@ -1,4 +1,4 @@
-package com.example.gaminghealthtracker
+package com.cdmedia.gaminghealthtracker
 
 import org.junit.Test
 
